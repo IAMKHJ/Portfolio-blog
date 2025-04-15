@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{common/header::header}"></head>
+<style>
+    *{font-family: -apple-system;}
+    .t{width:768px;margin:0 auto;margin-top: 160px;}
+    .c{width:768px;margin: 40px auto 100px;border-top: 1px solid #dbdbdb;border-bottom: 1px solid #dbdbdb;}
+    .t_title{font-size:48px;color:#212529;line-height: 1.5;font-weight: 800;margin-bottom:32px;word-wrap: break-word;}
+    .t_name{font-size:16px;color:#212529;font-weight: bold;}
+    .t_date{color:#495057;}
+    .t_hit{float: right;}
+    .c_con{margin: 60px auto;line-height: 1.7;color:#212529;font-size:18px;min-height: 350px;word-wrap: break-word;}
+    .detail_btn{text-align: center;font-size:15px;}
+    .detail_btn>button{border: 0;background-color:#0a0a0a;color:#fff;margin:0 15px;border-radius: 5px;padding: 5px 15px;}
+    .comment{width:768px;margin:50px auto 80px;}
+    .comment_content_origin{resize: none;width: 100%;height:100px;border: 1px solid #F1F3F5;padding: 16px 16px 24px;border-radius: 4px;color:#212529;margin-bottom:24px;}
+    .comment_content{resize: none;width: 100%;height:100px;border: 1px solid #F1F3F5;padding: 16px 16px 24px;border-radius: 4px;color:#212529;}
+    .comment_save_btn{border:0;background-color:#0a0a0a;color:#fff;border-radius: 4px;font-size: 16px;font-weight: bold;float: right;padding: 4px 20px;}
+    .comment_info{width:768px;margin:20px auto 50px;border-bottom: 1px solid #F1F3F5;display: flex;flex-direction: column;padding-bottom:25px;}
+    .info_top,.replyWrap{display:flex;}
+    .info_mid{margin: 0 0 5px;font-size:17px;}
+    .info_mid>p{margin:0;word-break: break-all;}
+    .profile{width:54px;height:54px;}
+    .profile>img{width:100%;height:100%;border-radius: 50%;}
+    .top_etc{margin-left:16px;}
+    .info_name{color:#495057;font-size:15px;font-weight: bold;}
+    .info_date{font-size:14px;color:#868E96;}
+    .comment_cnt{font-size: 1.125rem;line-height: 1.5;font-weight: 600;width: 768px;margin: 0 auto;}
+    .addStyle{border:0;color:#fff;border-radius: 4px;font-weight: bold;float: right;font-size: 14px;background-color:#3fbaff;padding: 4px 10px;}
+    .replyBtn{cursor:pointer;font-weight: bold;}
+    .r_profile{display: inline-block;width:54px;height:54px;}
+    .r_profile>img{width:100%;height:100%;border-radius: 50%;}
+    .reply_btn_wrap{}
+    .replyWrap,.r_con{background-color: rgba(0, 0, 0, 0.016);margin-left: 70px;}
+    .addStyle{margin-bottom:30px;}
+    .r_con{font-size: 17px;margin-left: 70px;word-break: break-all;margin-bottom: 5px;}
+    .reply_update_btn{margin-left:50px;}
+    .up,.del{cursor:pointer;font-weight: bold;font-size: 14px;}
+    .up{color:#4e84ff;}
+    .del{color:#ff8282;}
+    .writer{background-color: #e4f9ff;}
+    .likeWrap{width:768px;margin:100px auto 0;text-align: center;}
+    .likeDiv{display: inline-block;width:70px;height:70px;}
+    .likeImg{width:100%;height:100%;}
+    .likeImg:hover{filter:invert(16%) sepia(95%) saturate(7277%) hue-rotate(359deg) brightness(105%) contrast(113%);cursor:pointer;}
+    .likeText,.likeCount{font-weight:bold;font-size: 20px;color: #000;}
+    .like{filter:invert(16%) sepia(95%) saturate(7277%) hue-rotate(359deg) brightness(105%) contrast(113%);}
+    .comment_info_wrap{margin-bottom: 200px;}
+    .chatArea{resize:none;height: 155px;}
+    .chatFix{position: fixed;top: 200px;left: 50px;width: 450px;}
+</style>
+<script th:inline="javascript">
+    function list(){
+        location.href = "/post/list?page="+[[${page}]]+"&keyword="+[[${keyword}]]+"&category="+[[${categoryKeyword}]]
+    }
+
+    function update(){
+        location.href = "/post/update/"+[[${post.id}]]+"?page="+[[${page}]]+"&keyword="+[[${keyword}]]+"&category="+[[${categoryKeyword}]]
+    }
+
+    function del(){
+        $.ajax({
+            url: "/post/delete/"+[[${post.id}]],
+            type: 'DELETE',
+            success: function(res){
+                if(res.key=='ok'){
+                    alert('글이 삭제되었습니다.')
+                    location.href = '/post/list?category='+[[${categoryKeyword}]]
+                }
+            }
+        })
+    }
+
+    function commentSave(is){
+        const user = $('#user').val()
+        if(user==undefined){
+            alert('로그인이 필요합니다.')
+            location.href = '/login'
+            return false
+        }
+
+        let data;
+        if(is){
+            data = $(is).parent().parent().serialize()
+
+            if($(is).prev().val()==''){
+                alert('내용을 입력하세요.')
+                return false
+            }
+        }else {
+            data = $("#commentForm").serialize()
+
+            if($("#commentContent").val()==''){
+                alert('내용을 입력하세요.')
+                return false
+            }
+        }
+
+        $.ajax({
+            url: "/comment/save",
+            data: data,
+            type: 'POST',
+            success: function(res){
+                $("#comment_info_wrap").replaceWith(res);
+                alert('등록되었습니다.')
+                $("#commentContent").val('')
+            }
+        })
+    }
+
+    function updateComment(is){
+
+        $.ajax({
+            url: "/comment/update",
+            data: $(is).parent().serialize(),
+            type: 'POST',
+            success: function(res){
+                $("#comment_info_wrap").replaceWith(res)
+                alert('수정되었습니다.')
+            }
+        })
+    }
+
+    function delComment(is){
+        $.ajax({
+            url: "/comment/delete",
+            data: $(is).next().serialize(),
+            type: 'POST',
+            success: function(res){
+                $("#comment_info_wrap").replaceWith(res)
+                alert('삭제되었습니다.')
+            }
+        })
+    }
+
+    function addReplyHtml(e){
+        removeHtml()
+        const html = ''
+            +'<textarea class="comment_content" name="content" placeholder="내용을 작성하세요" maxlength="500"></textarea>'
+            +'<button type="button" class="addStyle" onclick="commentSave(this)">답글 등록</button>';
+            $(e).parent().append(html);
+    }
+
+    function addUpdateHtml(e,type){
+        removeHtml()
+        const html = ''
+            +'<textarea class="comment_content" name="content" placeholder="내용을 작성하세요" maxlength="500"></textarea>'
+            +'<button type="button" class="addStyle" onclick="updateComment(this)">수정</button>';
+        if(type=='origin'){
+            $(e).parent().parent().next().next().next().append(html); // 댓글 수정
+        }else{
+            $(e).parent().parent().next().next().append(html); // 답글 수정
+        }
+    }
+
+    function removeHtml(){
+        $('.comment_content').remove();
+        $('.addStyle').remove();
+    }
+
+    $('.likeDiv').click(function(){
+        $('.likeDiv').hide()
+    })
+
+    function like(){
+
+        $.ajax({
+            url: "/like/post",
+            data: $("#likeForm").serialize(),
+            type: 'POST',
+            success: function(res){
+                if(res.key=='noMember'){
+                    alert('로그인이 필요합니다.')
+                    location.href = '/login'
+                }else if(res.key=='noPost'){
+                    alert('작성된 글을 찾을 수 없습니다.')
+                    location.href = '/post/list?page='+[[${page}]]
+                }else if(res.key=='first'){
+                    $('.likeImg').addClass('like')
+                    $('.likeCount').html(res.data)
+                }else if(res.key=='true'){
+                    $('.likeImg').addClass('like')
+                    $('.likeCount').html(res.data)
+                }else if(res.key=='false'){
+                    $('.likeImg').removeClass('like')
+                    $('.likeCount').html(res.data)
+                }
+            }
+        })
+
+    }
+
+    <!--채팅-->
+    let stompClient
+    let roomId
+    let userName
+
+    function enter(){
+        userName = loginChk()
+        roomId = $('#roomId').val()
+        let sockJs = new SockJS('/stomp/chat')
+        stompClient = Stomp.over(sockJs)
+
+        stompClient.connect({}, function (chat){
+            $("#enter").attr('disabled', true)
+            console.log("STOMP 연결완료")
+
+            stompClient.subscribe("/sub/chat/" + roomId, function (chat) {
+                let content = JSON.parse(chat.body)
+                let type = content.type
+                let sender = content.sender
+                let message = content.message
+                let html = ``
+                    +`<div class="addChat">${message}</div>`
+                $("#chatArea").append(html)
+                if($('.addChat').length>6){
+                    $('.addChat').first().remove()
+                }
+            })
+
+            stompClient.send('/pub/chat', {}, JSON.stringify({type: 'ENTER', roomId: roomId, sender: userName}))
+            $('#chatText').val('')
+
+        })
+    }
+
+    function leave(){
+        stompClient.send('/pub/chat', {}, JSON.stringify({type: 'LEAVE', roomId: roomId, sender: userName}))
+        stompClient.disconnect()
+        $('#chatText').val('')
+    }
+
+    function send(){
+        if(window.event.keyCode == 13){
+            if($("#enter").attr('disabled')=='disabled'){
+                if($('#chatText').val()==''){
+                    alert('내용을 입력하세요.')
+                    $('#chatText').focus()
+                    return false
+                }
+
+                stompClient.send('/pub/chat', {}, JSON.stringify({type: 'TALK', roomId: roomId, message: $('#chatText').val(), sender: userName}))
+                $('#chatText').val('')
+            }else {
+                alert('채팅 시작을 눌러주세요.')
+            }
+        }
+    }
+
+    function loginChk(){
+        const user = $('#userName').val()
+        if(user==undefined){
+            alert('로그인이 필요합니다.')
+            location.href = '/login'
+            return false
+        }
+        return user
+    }
+
+    $(function(){
+        window.addEventListener('beforeunload', function () { //현재 페이지를 떠나거나 브라우저를 종료하려 할 때
+            leave() //채팅 연결 종료
+        })
+
+        $('.chatOnOff').hide()
+    })
+
+    function onOff() {
+        if($('.chatOnOff').css('display')=='none'){
+            $('.chatOnOff').show()
+        }else{
+            $('.chatOnOff').hide()
+        }
+    }
+</script>
+<body>
+    <div th:replace="~{common/bodyUtil::bodyUtil}"></div>
+    <div th:replace="~{common/bodyHeader::bodyHeader}"></div>
+
+    <div class="t">
+        <div class="t_con">
+            <div class="t_title" th:text="${post.title}"></div>
+            <span class="t_name" th:text="${post.member.name}"></span>
+            <span class="separator">·</span>
+            <span class="t_date" th:text="*{#temporals.format(post.createdDate, 'yyyy년 MM월 dd일 HH:mm')}"></span>
+            <span class="t_hit">조회수 <span th:text="${post.hit}"></span></span>
+        </div>
+    </div>
+    <div class="c">
+        <div class="c_con" th:utext="${post.content}"></div>
+    </div>
+
+    <div class="detail_btn">
+        <button onclick="list()" type="button" class="">목록</button>
+        <button onclick="update()" type="button" class="" th:if="${session.USER != null && session.USER.id==post.member.id}">수정</button>
+        <button onclick="del()" type="button" class="" th:if="${session.USER != null && session.USER.id==post.member.id}">삭제</button>
+    </div>
+
+    <div class="likeWrap">
+        <form id="likeForm">
+            <input type="hidden" name="memberId" th:value="${session.USER == null ? '0' : session.USER.id}">
+            <input type="hidden" name="postId" th:if="${post.id != null}" th:value="${post.id}">
+        </form>
+        <div class="likeDiv" onclick="like()">
+            <img class="likeImg" src="/images/like.svg" alt="" th:classappend="${like == true} ? 'like' : ''"]>
+            <span class="likeText">좋아요</span><span class="likeCount" th:text="${likeCnt}"></span>
+        </div>
+    </div>
+
+    <!-- 댓글 시작 -->
+    <div class="comment">
+        <div class="comment_form">
+            <form id="commentForm">
+                <input type="hidden" id="user" name="memberId" th:if="${session.USER != null}" th:value="${session.USER.id}">
+                <input type="hidden" name="postId" th:if="${post.id != null}" th:value="${post.id}">
+                <div>
+                    <textarea class="comment_content_origin" id="commentContent" name="content" placeholder="내용을 작성하세요" maxlength="500"></textarea>
+                </div>
+                <button type="button" class="comment_save_btn" onclick="commentSave()">댓글 등록</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="comment_info_wrap" id="comment_info_wrap">
+        <div class="comment_cnt" th:if="${commentList.size > 0}" th:text="|${commentList.size}개의 댓글|"></div>
+        <div class="comment_info" th:each="comment:${commentList}" th:if="${comment.parentId == null}">
+            <div class="info_top" th:classappend="${comment.memberName == comment.postMemberName} ? 'writer' : ''">
+                <div class="profile">
+                    <img src="/images/profile.jpg" th:if="${comment.file==null}">
+                    <img th:src="${comment.file.filePath}" th:if="${comment.file!=null}">
+                </div>
+                <div class="top_etc">
+                    <div class="info_name" th:text="${comment.memberName}"></div>
+                    <div class="info_date" th:text="*{#temporals.format(comment.createdDate, 'yyyy년 MM월 dd일 HH:mm')}|"></div>
+                </div>
+                <div class="reply_update_btn" th:if="${session.USER != null && session.USER.id==comment.memberId}">
+                    <span class="up" onclick="addUpdateHtml(this,'origin')">수정</span>
+                    <span class="del" onclick="delComment(this)">삭제</span>
+                    <form id="delCommentForm">
+                        <input type="hidden" name="postId" th:value="${comment.postId}">
+                        <input type="hidden" name="id" th:value="${comment.id}">
+                    </form>
+                </div>
+            </div>
+            <div class="info_mid" th:classappend="${comment.memberName == comment.postMemberName} ? 'writer' : ''">
+                <p th:text="${comment.content}"></p>
+            </div>
+            <form id="replyForm">
+                <input type="hidden" name="memberId" th:if="${session.USER != null}" th:value="${session.USER.id}">
+                <input type="hidden" name="postId" th:if="${comment.postId != null}" th:value="${comment.postId}">
+                <input type="hidden" name="parentId" th:if="${comment.id != null}" th:value="${comment.id}">
+                <div class="reply_btn_wrap">
+                    <span class="replyBtn" onclick="addReplyHtml(this)">답글</span>
+                </div>
+            </form>
+            <form id="updateComment">
+                <input type="hidden" name="postId" th:value="${comment.postId}">
+                <input type="hidden" name="id" th:value="${comment.id}">
+            </form>
+            <!-- 답글 시작 -->
+            <div th:if="${comment.id == reply.parentId}" th:each="reply:${commentList}">
+                <div class="replyWrap" th:classappend="${reply.memberName == reply.postMemberName} ? 'writer' : ''">
+                    <div class="profile">
+                        <img src="/images/profile.jpg" th:if="${reply.file==null}">
+                        <img th:src="${reply.file.filePath}" th:if="${reply.file!=null}">
+                    </div>
+                    <div class="top_etc">
+                        <div class="info_name" th:text="${reply.memberName}"></div>
+                        <div class="info_date" th:text="*{#temporals.format(reply.createdDate, 'yyyy년 MM월 dd일 HH:mm')}|"></div>
+                    </div>
+                    <div class="reply_update_btn" th:if="${session.USER != null && session.USER.id==reply.memberId}">
+                        <span class="up" onclick="addUpdateHtml(this,'')">수정</span>
+                        <span class="del" onclick="delComment(this)">삭제</span>
+                        <form id="delReplyForm">
+                            <input type="hidden" name="postId" th:value="${reply.postId}">
+                            <input type="hidden" name="id" th:value="${reply.id}">
+                        </form>
+                    </div>
+                </div>
+                <div class="r_con" th:classappend="${reply.memberName == reply.postMemberName} ? 'writer' : ''" th:text="${reply.content}"></div>
+                <form id="updateReply">
+                    <input type="hidden" name="postId" th:value="${reply.postId}">
+                    <input type="hidden" name="id" th:value="${reply.id}">
+                </form>
+            </div>
+            <!-- 답글 끝 -->
+        </div>
+    </div>
+    <!-- 댓글 끝 -->
+    <!-- 채팅 시작 -->
+    <div class="chatFix">
+        <button type="button" th:if="${chat!=null}" class="btn btn-outline-secondary" onclick="onOff()">실시간 채팅</button>
+        <div class="chatOnOff" th:if="${chat!=null}">
+            <input type="hidden" id="roomId" th:if="${chat!=null}" th:value="${chat.name}">
+            <input type="hidden" id="userName" th:if="${session.USER!=null}" th:value="${session.USER.uid}">
+            <div class="form-control chatArea" id="chatArea"></div>
+            <div class="d-flex justify-content-evenly mt-1">
+                <div class="col-3">
+                    <button type="button" class="btn btn-outline-primary" id="enter" onclick="enter()">채팅 시작</button>
+                </div>
+                <div class="col-9">
+                    <input type="text" class="form-control" id="chatText" onkeydown="send()" placeholder="글 작성 후 Enter를 입력하세요.">
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 채팅 끝 -->
+</body>
+</html>

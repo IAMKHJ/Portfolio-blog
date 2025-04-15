@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<div th:fragment="bodyUtil" class="authWrap">
+    <style>
+        .authWrap{width:0;height:0;}
+        .authAll{position:absolute;right:15px;top:15px;}
+        .authLog{border-radius: 5px;text-decoration-line: none;color:#000;font-weight: bold;background-color: #fff;padding: 5px 15px;font-size: 15px;}
+        .authLog:hover{background: #000;color:#fff;}
+        .authName{color:#000;font-weight: bold;font-size: 18px;}
+        .header_profile{text-decoration: none;padding: 21px 10px;border-radius: 10px;}
+        .header_profile:hover{text-decoration: none;background-color: #ff8c00;}
+        .header_profile>img{width: 55px;height:55px;background: none;border: none;border-radius: 10px;}
+    </style>
+    <div class="authAll">
+        <a class="authLog" href="/login" th:if="${session.USER==null}">로그인</a>
+        <a class="header_profile me-3" th:href="@{/myPage/info/{uid}(uid = ${session.USER.uid})}" th:if="${session.USER!=null}">
+            <img src="/images/profile.jpg" class="img-thumbnail" alt="" th:if="${session.USER!=null && #lists.isEmpty(session.USER.files)}">
+            <img th:each="file : ${session.USER.files}" th:src="@{${file.filePath}}" class="img-thumbnail" th:if="${session.USER!=null && !#lists.isEmpty(session.USER.files)}">
+            <span class="authName"  th:text="${session.USER.name}"></span>
+        </a>
+        <a class="authLog" href="/logout" th:if="${session.USER!=null}">로그아웃</a>
+    </div>
+
+</div>

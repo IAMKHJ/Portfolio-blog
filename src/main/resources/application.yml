@@ -1,0 +1,14 @@
+spring:
+  profiles:
+    active: ${profile}
+  jackson:
+    serialization:
+      fail-on-empty-beans: false
+  servlet:
+    multipart:
+      maxFileSize: 5MB
+
+logging:
+  level:
+    org.hibernate.SQL: debug
+    org.hibernate.type: trace

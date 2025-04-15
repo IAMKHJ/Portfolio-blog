@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{common/header::header}"></head>
+<style>
+    .joinForm{width:400px;margin:100px auto 0;}
+    .j_title{font-size: 60px;font-weight: bold;letter-spacing: 20px;color: #000;text-align: center;}
+    .join_box{margin: 10px 0 0;border: 1px solid #ddd;border-radius: 3px;background-color: #fff;box-sizing: border-box;}
+    .m_form>p{padding:0 19px;font-size: 13px;}
+    .input_form{margin: 0;width: 100%;padding: 18px 19px 19px;box-sizing: border-box;}
+    .input_form>input{display: block;width: 100%;height: 100%;font-size: 13px;color: #000;border: none;outline: 0;-webkit-appearance: none;background-color: transparent;}
+    .password, .name{border-top: 1px solid #ddd;}
+    .join_btn{margin: 20px 0 0;width: 100%;height: 48px;border-radius: 3px;font-size: 16px;color: #fff;background-color: #000;border: 0;}
+    .join_error{padding-left:20px;color:red;font-size:13px;}
+</style>
+<script th:inline="javascript">
+    function join(){
+        const regUid = /^[a-zA-Z][0-9a-zA-Z]{3,11}$/g
+        if(regUid.test($("#uid").val()) == false){
+            alert('아이디는 영문 또는 숫자 4~12자 입력하세요.')
+            return false
+        }
+        if($("#uid").val()==''){
+            alert('아이디를 입력하세요.')
+            return false
+        }
+        if($("#password").val()==''){
+            alert('비밀번호를 입력하세요.')
+            return false
+        }
+        if($("#password").val().length<8||$("#password").val().length>16){
+            alert('비밀번호를 8~16자 입력하세요.')
+            return false
+        }
+        if($("#name").val()==''||$("#name").val().length>15){
+            alert('이름을 입력하세요.')
+            return false
+        }
+        const regName =  /^[가-힣]+$/
+        if(regName.test($("#name").val()) == false){
+            alert('이름은 한글만 입력하세요.')
+            return false
+        }
+
+        $.ajax({
+            url: "/join",
+            data: $("#joinForm").serialize(),
+            type: 'POST',
+            success: function(res){
+                if(res.key=='ok'){
+                    alert(res.data+'님 환영합니다.')
+                    location.href = '/login'
+                }else if(res.key=='duplicateUid'){
+                    alert('이미 사용중인 아이디입니다.')
+                }
+            }
+        })
+    }
+</script>
+<body>
+    <div th:replace="~{common/bodyHeader::bodyHeader}"></div>
+    <div class="all">
+        <form id="joinForm">
+            <input type="hidden" name="roleType" value="ADMIN">
+            <div class="joinForm">
+                <div class="j_title">ADMIN</div>
+                <div class="join_box">
+                    <div class="m_form">
+                        <div class="input_form">
+                            <input type="text" id="uid" name="uid" placeholder="ID 4~12글자">
+                        </div>
+                    </div>
+                    <div class="m_form">
+                        <div class="input_form password">
+                            <input type="password" id="password" name="password" placeholder="Password 8~16글자">
+                        </div>
+                    </div>
+                    <div class="m_form">
+                        <div class="input_form name">
+                            <input type="text" id="name" name="name" placeholder="이름">
+                        </div>
+                    </div>
+                </div>
+                <button type="button" class="join_btn" onclick="join()">회원가입</button>
+            </div>
+        </form>
+    </div>
+</body>
+</html>

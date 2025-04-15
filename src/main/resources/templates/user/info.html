@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{common/header::header}"></head>
+<style>
+    .a{width:800px;margin:180px auto 0;}
+    .info{width: 500px;margin: 0 auto;}
+    .infoDiv{background-color: #e3eeff;border-radius: 15px;padding: 10px 50px;}
+    .lh{line-height:38px;}
+</style>
+<script th:inline="javascript">
+    $(document).ready(function() {
+        $('.bar').find('a[href="' + document.location.pathname + '"]').addClass('active')
+    })
+    function change(){
+
+        if($("#pw").val()==''){
+            alert('현재 비밀번호를 입력하세요.')
+            $("#pw").focus()
+            return false
+        }
+        if($("#pwc").val()==''){
+            alert('새 비밀번호를 입력하세요.')
+            $("#pwc").focus()
+            return false
+        }
+        if($("#pwc").val().length<8||$("#pwc").val().length>16){
+            alert('비밀번호를 8~16자 입력하세요.')
+            $("#pwc").focus()
+            return false
+        }
+        if($("#pwc2").val()==''){
+            alert('새 비밀번호를 입력하세요.')
+            $("#pwc2").focus()
+            return false
+        }
+        if($("#pwc").val()!=$("#pwc2").val()){
+            alert('새 비밀번호가 일치하지않습니다.')
+            $("#pwc").val('')
+            $("#pwc2").val('')
+            $("#pwc").focus()
+            return false
+        }
+
+        $.ajax({
+            url: "/changePw",
+            data: $("#memberInfoForm").serialize(),
+            type: 'POST',
+            success: function(res){
+                if(res.key=='ok'){
+                    alert('비밀번호가 변경되었습니다.')
+                    location.href = '/'
+                }else if(res.key=='wrong'){
+                    alert('현재 비밀번호를 틀렸습니다.')
+                    $("#pw").val('')
+                    $("#pwc").val('')
+                    $("#pwc2").val('')
+                    $("#pw").focus()
+                }else if(res.key=='false'){
+                    alert('등록된 사용자가 없습니다.')
+                    location.href = '/logout'
+                }
+            }
+        })
+    }
+</script>
+<body>
+    <div th:replace="~{common/bodyUtil::bodyUtil}"></div>
+    <div th:replace="~{common/bodyHeader::bodyHeader}"></div>
+    <div class="a">
+        <ul class="nav nav-tabs bar">
+            <li class="nav-item">
+                <a class="nav-link" th:href="@{/myPage/info/{uid}(uid = ${session.USER.uid})}">기본 정보</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" th:href="@{/myPage/profile/{uid}(uid = ${session.USER.uid})}">프로필 이미지</a>
+            </li>
+            <li class="nav-item" th:if="${#strings.equals(session.USER.roleType, 'ADMIN')}">
+                <a class="nav-link" th:href="@{/myPage/category/{uid}(uid = ${session.USER.uid})}">카테고리 설정</a>
+            </li>
+        </ul>
+        <form id="memberInfoForm">
+            <input type="hidden" name="id" th:value="${member.id}">
+            <div class="d-flex flex-column mt-4 text-center info">
+                <div class="d-flex infoDiv mb-2">
+                    <div class="col-4">아이디</div>
+                    <div class="col-8" th:text="${member.uid}"></div>
+                </div>
+                <div class="d-flex infoDiv mb-2">
+                    <div class="col-4">이름</div>
+                    <div class="col-8" th:text="${member.name}"></div>
+                </div>
+                <div class="d-flex infoDiv mb-3">
+                    <div class="col-4">이메일</div>
+                    <div class="col-8" th:text="${member.email}"></div>
+                </div>
+                <div class="d-flex mb-1">
+                    <div class="col-4 lh">현재 비밀번호</div>
+                    <div class="col-8"><input type="password" class="form-control" id="pw" name="password"></div>
+                </div>
+                <div class="d-flex mb-1">
+                    <div class="col-4 lh">새 비밀번호</div>
+                    <div class="col-8"><input type="password" class="form-control" id="pwc" name="changePassword"></div>
+                </div>
+                <div class="d-flex mb-1">
+                    <div class="col-4 lh">새 비밀번호 확인</div>
+                    <div class="col-8"><input type="password" class="form-control" id="pwc2"></div>
+                </div>
+                <div class="d-flex justify-content-evenly mt-3">
+                    <button class="btn btn-outline-primary" type="button" onclick="change()">비밀번호 변경</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</body>
+</html>

@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{common/header::header}"></head>
+<style>
+    .t{width:1000px;margin:0 auto;padding-top:180px;text-align: center;}
+    .write{text-align: center;margin-top: 60px;}
+    .c{width:940px;margin:0 auto;margin-top:75px;}
+    .c_list{width:900px;background-color: #fff;}
+    .c_ul{list-style: none;}
+    .c_ul>li{border-bottom: 1px solid #777;margin-top:20px;}
+    .c_ul>li:first-child{border-top: 1px solid #777;margin-top:0;padding-top:20px;}
+    .c_ul>li>a{display:flex;text-decoration: none;color:#777;padding-bottom: 20px;}
+    .c_ul>li>a:hover{color:#333}
+    .c_img>img{width:200px;height:100%;padding: 10px;}
+    .c_cont{padding: 20px 20px;position: relative;min-width: 668px;}
+    .c_hit{font-size: 13px;}
+    .c_title{font-size: 22px;color:#000}
+    .c_title>span{text-overflow: ellipsis;overflow: hidden;display: -webkit-box;-webkit-line-clamp: 1;-webkit-box-orient: vertical;}
+    .c_desc{font-size: 14px;max-height: 58px;min-height: 58px;overflow: hidden;}
+    .c_desc>span{margin-top: 15px;text-overflow: ellipsis;overflow: hidden;display: -webkit-box;-webkit-line-clamp: 2;-webkit-box-orient: vertical;word-wrap: break-word;}
+    .c_name{position: absolute;left: 0;bottom: 0;margin-left: 20px;margin-bottom: 20px;font-size: 14px;}
+    .c_date{position: absolute;right: 0;bottom: 0;margin-right: 20px;margin-bottom: 20px;font-size: 14px;}
+    .c_etc{margin-top: 35px;}
+    .active{color: #000;font-weight:bold;}
+    .writePost{margin-right: 2%;background: #000;border-radius: 20px;padding: 7px 20px;text-decoration-line: none;color: #fff;font-weight: bold;}
+    .writePost:hover{background:#ff8c00;color:#fff;}
+    .pageWrap{display: flex;justify-content: center;margin: 100px 0;}
+    .pageWrap>a{border: 1px solid #0a0a0a;color:#0a0a0a;padding: 7px 10px;border-radius: 5px;text-decoration: none;font-weight: bold;}
+    .pageWrap>span{border: 1px solid #0a0a0a;color:#0a0a0a;padding: 7px 10px;border-radius: 5px;text-decoration: none;font-weight: bold;}
+    .pageWrap>span>a{text-decoration: none;color:#0a0a0a;}
+    .ho:hover{text-decoration: underline;}
+    .noList{font-weight:bold;text-align: center;}
+    .search_box{display: inline-block;width:750px;border: 1px solid #ddd;border-radius: 15px;background-color: #fff;box-sizing: border-box;}
+    .input_form{width: 100%;margin: 0;padding: 12px 15px 12px;box-sizing: border-box;}
+    .search{display: block;width: 100%;height: 100%;font-size: 13px;color: #000;border: none;outline: 0;-webkit-appearance: none;background-color: transparent;}
+    .categoryA{position: relative;text-decoration: none;color:#777;font-weight: bold;font-size: 36px;}
+    .categoryA:hover{color:#000;}
+    .active{color:#000;}
+    .active:before{background-color: #f54;content: '';display: block;position: absolute;bottom: 2px;width: 100%;height: 6px;}
+</style>
+<script th:inline="javascript">
+    function keyword(e){
+        if(window.event.keyCode == 13){
+            location.href = '/post/list?category='+[[${categoryKeyword}]]+'&keyword='+e.value
+        }
+    }
+</script>
+<body>
+    <div th:replace="~{common/bodyUtil::bodyUtil}"></div>
+    <div th:replace="~{common/bodyHeader::bodyHeader}"></div>
+    <div class="t">
+        <div class="category_wrap d-flex justify-content-evenly mb-5">
+            <a class="categoryA" th:classappend="${categoryKeyword}==${category.name}?active:''" th:each="category:${categoryList}" th:href="@{/post/list(category=${category.name})}" th:text="${category.name}"></a>
+        </div>
+        <div class="search_box">
+            <div class="input_form">
+                <input type="text" class="search" name="keyword" placeholder="검색" th:value="${keyword}" onkeydown="keyword(this)">
+            </div>
+        </div>
+    </div>
+    <div class="c">
+        <div class="c_list">
+            <ul class="c_ul">
+                <div class="noList" th:if="${list.totalElements<=0}">등록된 글이 없습니다.</div>
+                <li th:each="post : ${list}">
+                    <a th:href="@{|/post/detail/${post.id}|(page=${list.number + 1},keyword=${keyword},category=${categoryKeyword})}">
+                        <div class="c_img">
+                            <img src="/images/no_img.png" alt="" th:if="${post.file==null}">
+                            <img th:src="${post.file.filePath}" alt="" th:if="${post.file!=null}">
+                        </div>
+                        <div class="c_cont">
+                            <div class="c_hit">조회수 <span th:text="${post.hit}"></span></div>
+                            <div class="c_title">
+                                <span class="ct" th:text="${post.title}"></span>
+                            </div>
+                            <div class="c_desc">
+                                <span class="cd" th:utext="${post.content}"></span>
+                            </div>
+                            <div class="c_etc">
+                                <span class="c_name" th:text="${post.memberName}"></span>
+                                <span class="c_date" th:text="*{#temporals.format(post.createdDate, 'yyyy.MM.dd HH:mm')}"></span>
+                            </div>
+                        </div>
+                    </a>
+                </li>
+            </ul>
+        </div>
+        <div class="write">
+            <a class="writePost" href="/post/write">글쓰기</a>
+        </div>
+        <!-- 페이징 -->
+        <div class="pageWrap" th:if="${list.totalElements>0}">
+            <!-- 첫번째 페이지로 이동 -->
+            <a class="me-1 ho" th:href="@{/post/list(page=1,keyword=${keyword},category=${categoryKeyword})}">처음</a>
+            <!-- 이전 링크 활성화 비활성화 -->
+            <a class="me-3 ho" th:href="${list.first} ? '#' : @{/post/list(page=${list.number},keyword=${keyword},category=${categoryKeyword})}">이전</a>
+            <!-- 페이지 번호 링크(현재 페이지는 숫자만) -->
+            <span th:style="${page == list.number + 1?'background-color:#0a0a0a;color: #fff;':''}" class="ms-1 me-1" th:each="page : ${#numbers.sequence(startPage, endPage)}">
+                <span th:if="${page == list.number + 1}" th:text="${page}"></span>
+                <a class="ho" th:unless="${page == list.number + 1}" th:href="@{/post/list(page=${page},keyword=${keyword},category=${categoryKeyword})}" th:text="${page}"></a>
+            </span>
+            <!-- 다음 링크 활성화 비활성화 -->
+            <a class="ms-3 ho" th:href="${list.last} ? '#' : @{/post/list(page=${list.number + 2},keyword=${keyword},category=${categoryKeyword})}">다음</a>
+            <!-- 마지막 페이지로 이동 -->
+            <a class="ms-1 ho" th:href="@{/post/list(page=${list.totalPages},keyword=${keyword},category=${categoryKeyword})}">마지막</a>
+        </div>
+    </div>
+</body>
+</html>

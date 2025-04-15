@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{common/header::header}"></head>
+<style>
+    *{font-family: -apple-system;}
+    .c{width:1000px;margin:0 auto;padding-top:100px;}
+</style>
+<script th:inline="javascript">
+    function cancel(){
+        location.href = '/post/detail/'+[[${post.id}]]+"?page="+[[${page}]]+"&keyword="+[[${keyword}]]+"&category="+[[${categoryKeyword}]]
+    }
+
+    function update(){
+
+        if($('#category option:selected').val()==''){
+            alert('카테고리를 선택하세요.')
+            $("#category").focus();
+            return false
+        }
+
+        if($("#title").val()==''){
+            alert('제목을 입력하세요.')
+            $("#title").focus();
+            return false
+        }
+
+        const imgFile = $('#file').val()
+        const fileForm = /(.*?)\.(jpg|jpeg|png|gif)$/
+        const maxSize = 5 * 1024 * 1024
+
+        if(imgFile == "") {
+            alert("썸네일을 업로드하세요.")
+            $("#file").focus();
+            return false
+        }
+
+        if(imgFile != "" && imgFile != null) {
+            const fileSize = $("#file")[0].files[0].size;
+            if(!imgFile.match(fileForm)) {
+                alert("이미지 파일만 업로드 가능합니다.");
+                return false
+            } else if(fileSize > maxSize) {
+                alert("파일 사이즈는 5MB까지 가능합니다.");
+                return false
+            }
+        }
+
+        let content = tinymce.get('content').getContent();
+        if($.trim(content) == ''){
+            alert('내용을 입력하세요.')
+            $("#conDiv").focus();
+            return false
+        }
+
+        $("#content").val(content)
+
+        let form = $('#updateForm')[0]
+        let formData = new FormData(form)
+
+        $.ajax({
+            url: "/post/update/"+[[${post.id}]],
+            data: formData,
+            type: 'PATCH',
+            contentType:false,
+            processData:false,
+            cache: false,
+            success: function(res){
+                if(res.key=='ok'){
+                    alert('글이 수정되었습니다.')
+                    location.href = '/post/detail/'+res.data+'?page='+[[${page}]]+'&category='+[[${categoryKeyword}]]
+                }else if(res.key=='false'){
+                    alert('파일 업로드를 실패하였습니다.')
+                }
+            }
+        })
+    }
+
+    $(function(){
+        var plugins = [
+            "advlist", "autolink", "lists", "link", "image", "charmap", "preview", "anchor",
+            "searchreplace", "visualblocks", "code", "fullscreen", "insertdatetime", "media", "table",
+            "code", "help", "wordcount", "save"
+        ];
+        var edit_toolbar = 'formatselect fontselect fontsizeselect |'
+                   + ' forecolor backcolor |'
+                   + ' bold italic underline strikethrough |'
+                   + ' alignjustify alignleft aligncenter alignright |'
+                   + ' bullist numlist |'
+                   + ' table tabledelete |'
+                   + ' link image';
+
+        tinymce.init({
+            selector: '#content',
+            height: 1000,
+            menubar: false,
+            plugins: plugins,
+            toolbar: edit_toolbar,
+            image_title: true,
+            automatic_uploads: true,
+            file_picker_types: 'image',
+            file_picker_callback: function (cb, value, meta) {
+                var input = document.createElement('input');
+                input.setAttribute('type', 'file');
+                input.setAttribute('accept', 'image/*');
+
+                input.onchange = function () {
+                    var file = this.files[0];
+
+                    var reader = new FileReader();
+                    reader.onload = function () {
+
+                        var id = 'blobid' + (new Date()).getTime();
+                        var blobCache =  tinymce.activeEditor.editorUpload.blobCache;
+                        var base64 = reader.result.split(',')[1];
+                        var blobInfo = blobCache.create(id, file, base64);
+                        blobCache.add(blobInfo);
+
+                        cb(blobInfo.blobUri(), { title: file.name });
+                    };
+                    reader.readAsDataURL(file);
+                };
+                input.click();
+            },
+
+            content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:18px }'
+        });
+
+    });
+
+    function delFile(is){
+        $(is).parent().remove()
+        const html = ''
+            +'<input type="file" class="form-control" id="file" name="file">'
+            +'<label class="input-group-text" for="file" >업로드</label>'
+            $('.addFile').append(html)
+    }
+</script>
+<body>
+    <div th:replace="~{common/bodyUtil::bodyUtil}"></div>
+    <div th:replace="~{common/bodyHeader::bodyHeader}"></div>
+    <div class="c">
+        <form id="updateForm" method="post" enctype="multipart/form-data">
+            <input type="hidden" name="id" th:value="${post.id}">
+            <div>
+                <label class="form-label fw-bold">카테고리</label>
+                <select class="form-select mb-3" aria-label="Default select example" id="category" name="category">
+                    <option value="">선택</option>
+                    <option th:each="category:${categoryList}" th:selected="${post.category} == ${category.name}" th:value="${category.name}" th:text="${category.name}"></option>
+                </select>
+                <div class="mb-3">
+                    <label for="title" class="form-label fw-bold">제목</label>
+                    <input type="text" class="form-control" id="title" name="title" placeholder="제목을 입력하세요." th:value="${post.title}" maxlength="100">
+                </div>
+                <label class="form-label fw-bold">썸네일</label>
+                <div class="input-group mb-3 addFile">
+                    <div>
+                        <div th:remove="tag" th:if="${post.file == null}">
+                            <input type="file" class="form-control" id="file" name="file">
+                            <label class="input-group-text" for="file" >업로드</label>
+                        </div>
+                        <div th:remove="tag" th:if="${post.file != null}">
+                            <span th:text="${post.file.originFileName}"></span>
+                            <span style="color:#f00;cursor:pointer;" onclick="delFile(this)">삭제</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label tabindex="0" id="conDiv" for="content" class="form-label fw-bold">내용</label>
+                    <textarea id="content" name="content" cols="50" rows="10" placeholder="내용을 입력하세요." th:text="${post.content}"></textarea>
+                </div>
+                <div style="text-align: center;margin-bottom: 200px;">
+                    <button type="button" class="btn btn-outline-primary me-3" onclick="update()">수정</button>
+                    <button type="button" class="btn btn-outline-danger ms-3" onclick="cancel()">취소</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</body>
+</html>
