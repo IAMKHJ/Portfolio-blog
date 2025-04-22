@@ -70,7 +70,13 @@
                     location.href = '/login'
                 }else {
                     alert('등록을 실패하였습니다.')
-                    location.href = '/post/list'
+                    location.href = '/post/list?page=1&category='+[[${categoryKeyword}]]
+                }
+            },
+            error: function(xhr) {
+                if (xhr.status === 401) {
+                    alert('로그인이 필요합니다.')
+                    location.href = '/login'
                 }
             }
         })
@@ -128,7 +134,9 @@
 
     });
 
-
+    function cancel(){
+        location.href = '/post/list?page='+[[${page}]]+"&keyword="+[[${keyword}]]+"&category="+[[${categoryKeyword}]]
+    }
 </script>
 <body>
     <div th:replace="~{common/bodyUtil::bodyUtil}"></div>
@@ -157,6 +165,7 @@
                 </div>
                 <div style="text-align: center;margin-bottom: 200px;">
                     <button type="button" class="btn btn-outline-primary" onclick="save()">저장</button>
+                    <button type="button" class="btn btn-outline-danger ms-3" onclick="cancel()">취소</button>
                 </div>
             </div>
         </form>

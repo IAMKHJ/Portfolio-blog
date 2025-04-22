@@ -38,13 +38,13 @@ public class UserController {
 
     @ResponseBody
     @PostMapping("/login")
-    public MessageDto<?> login(@ModelAttribute LoginDto loginDto, HttpServletRequest request){
+    public MessageDto<?> login(@ModelAttribute LoginDto loginDto, HttpSession session){
 
         MessageDto<?> result = userService.login(loginDto);
 
         if(result.getKey().equals("ok")){
-            request.getSession().setAttribute("USER", result.getData());
-            request.getSession().setMaxInactiveInterval(60*60); // 1시간
+            session.setAttribute("USER", result.getData());
+            session.setMaxInactiveInterval(60*60); // 1시간
         }
 
         return result;

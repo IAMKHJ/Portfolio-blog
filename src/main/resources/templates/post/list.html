@@ -10,7 +10,7 @@
     .c_ul>li{border-bottom: 1px solid #777;margin-top:20px;}
     .c_ul>li:first-child{border-top: 1px solid #777;margin-top:0;padding-top:20px;}
     .c_ul>li>a{display:flex;text-decoration: none;color:#777;padding-bottom: 20px;}
-    .c_ul>li>a:hover{color:#333}
+    .c_ul>li>a:hover{color:#333;font-weight:600;}
     .c_img>img{width:200px;height:100%;padding: 10px;}
     .c_cont{padding: 20px 20px;position: relative;min-width: 668px;}
     .c_hit{font-size: 13px;}
@@ -86,7 +86,7 @@
             </ul>
         </div>
         <div class="write">
-            <a class="writePost" href="/post/write">글쓰기</a>
+            <a class="writePost" th:href="@{/post/write(category=${categoryKeyword},keyword=${keyword})}">글쓰기</a>
         </div>
         <!-- 페이징 -->
         <div class="pageWrap" th:if="${list.totalElements>0}">

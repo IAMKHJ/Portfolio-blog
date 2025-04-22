@@ -3,7 +3,7 @@ package com.portfolio.blog.service;
 import com.portfolio.blog.entity.File;
 import com.portfolio.blog.entity.Member;
 import com.portfolio.blog.entity.Post;
-import com.portfolio.blog.repository.FileRepository;
+import com.portfolio.blog.repository.file.FileRepository;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

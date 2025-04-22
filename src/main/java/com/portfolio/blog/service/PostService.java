@@ -51,7 +51,7 @@ public class PostService {
             chatService.createRoom(newPost.getId()); // 채팅방 생성
             return new MessageDto<>("ok", newPost.getCategory());
         }else{ // 글쓴이가 삭제된 상태
-            return new MessageDto<>("no");
+            return new MessageDto<>("no", dto.getCategory());
         }
     }
 

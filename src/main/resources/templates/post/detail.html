@@ -15,10 +15,11 @@
     .comment{width:768px;margin:50px auto 80px;}
     .comment_content_origin{resize: none;width: 100%;height:100px;border: 1px solid #F1F3F5;padding: 16px 16px 24px;border-radius: 4px;color:#212529;margin-bottom:24px;}
     .comment_content{resize: none;width: 100%;height:100px;border: 1px solid #F1F3F5;padding: 16px 16px 24px;border-radius: 4px;color:#212529;}
+    .comment_content_reply{resize: none;width: 90.887%;height:100px;border: 1px solid #F1F3F5;padding: 16px 16px 24px;border-radius: 4px;color:#212529;margin-left: 70px;}
     .comment_save_btn{border:0;background-color:#0a0a0a;color:#fff;border-radius: 4px;font-size: 16px;font-weight: bold;float: right;padding: 4px 20px;}
     .comment_info{width:768px;margin:20px auto 50px;border-bottom: 1px solid #F1F3F5;display: flex;flex-direction: column;padding-bottom:25px;}
-    .info_top,.replyWrap{display:flex;}
-    .info_mid{margin: 0 0 5px;font-size:17px;}
+    .info_top,.replyWrap{display:flex;border-top-left-radius: 10px;border-top-right-radius: 10px;padding-top: 10px;padding-left: 10px;}
+    .info_mid{margin: 0 0 5px;font-size:17px;border-bottom-left-radius: 10px;border-bottom-right-radius: 10px;padding-bottom: 10px;padding-left: 10px;}
     .info_mid>p{margin:0;word-break: break-all;}
     .profile{width:54px;height:54px;}
     .profile>img{width:100%;height:100%;border-radius: 50%;}
@@ -33,12 +34,12 @@
     .reply_btn_wrap{}
     .replyWrap,.r_con{background-color: rgba(0, 0, 0, 0.016);margin-left: 70px;}
     .addStyle{margin-bottom:30px;}
-    .r_con{font-size: 17px;margin-left: 70px;word-break: break-all;margin-bottom: 5px;}
+    .r_con{font-size: 17px;margin-left: 70px;word-break: break-all;margin-bottom: 5px;border-bottom-left-radius: 10px;border-bottom-right-radius: 10px;padding-bottom: 10px;padding-left: 10px;}
     .reply_update_btn{margin-left:50px;}
     .up,.del{cursor:pointer;font-weight: bold;font-size: 14px;}
     .up{color:#4e84ff;}
     .del{color:#ff8282;}
-    .writer{background-color: #e4f9ff;}
+    .writer{background-color: #e4f9ff}
     .likeWrap{width:768px;margin:100px auto 0;text-align: center;}
     .likeDiv{display: inline-block;width:70px;height:70px;}
     .likeImg{width:100%;height:100%;}
@@ -48,17 +49,24 @@
     .comment_info_wrap{margin-bottom: 200px;}
     .chatArea{resize:none;height: 155px;}
     .chatFix{position: fixed;top: 200px;left: 50px;width: 450px;}
+    .listBtn:hover,
+    .modBtn:hover,
+    .delBtn:hover,
+    .comment_save_btn:hover{background:#ff8c00;color:#fff;}
+    .up:hover{color: #004eff;}
+    .del:hover{color: #ff0000;}
+    .addStyle:hover{background: #00a3ff;}
 </style>
 <script th:inline="javascript">
-    function list(){
+    function list(){ //목록 가기
         location.href = "/post/list?page="+[[${page}]]+"&keyword="+[[${keyword}]]+"&category="+[[${categoryKeyword}]]
     }
 
-    function update(){
+    function update(){ //수정 폼으로 가기
         location.href = "/post/update/"+[[${post.id}]]+"?page="+[[${page}]]+"&keyword="+[[${keyword}]]+"&category="+[[${categoryKeyword}]]
     }
 
-    function del(){
+    function del(){ //글 삭제
         $.ajax({
             url: "/post/delete/"+[[${post.id}]],
             type: 'DELETE',
@@ -67,11 +75,17 @@
                     alert('글이 삭제되었습니다.')
                     location.href = '/post/list?category='+[[${categoryKeyword}]]
                 }
+            },
+            error: function(xhr) {
+                if (xhr.status === 401) {
+                    alert('로그인이 필요합니다.')
+                    location.href = '/login'
+                }
             }
         })
     }
 
-    function commentSave(is){
+    function commentSave(is){ //댓글 등록
         const user = $('#user').val()
         if(user==undefined){
             alert('로그인이 필요합니다.')
@@ -104,11 +118,22 @@
                 $("#comment_info_wrap").replaceWith(res);
                 alert('등록되었습니다.')
                 $("#commentContent").val('')
+            },
+            error: function(xhr) {
+                if (xhr.status === 401) {
+                    alert('로그인이 필요합니다.')
+                    location.href = '/login'
+                }
             }
         })
     }
 
-    function updateComment(is){
+    function updateComment(is){ //댓글 수정
+
+        if($(is).prev().val()==''){
+            alert('내용을 입력하세요.')
+            return false
+        }
 
         $.ajax({
             url: "/comment/update",
@@ -117,11 +142,17 @@
             success: function(res){
                 $("#comment_info_wrap").replaceWith(res)
                 alert('수정되었습니다.')
+            },
+            error: function(xhr) {
+                if (xhr.status === 401) {
+                    alert('로그인이 필요합니다.')
+                    location.href = '/login'
+                }
             }
         })
     }
 
-    function delComment(is){
+    function delComment(is){ //댓글 삭제
         $.ajax({
             url: "/comment/delete",
             data: $(is).next().serialize(),
@@ -129,11 +160,17 @@
             success: function(res){
                 $("#comment_info_wrap").replaceWith(res)
                 alert('삭제되었습니다.')
+            },
+            error: function(xhr) {
+                if (xhr.status === 401) {
+                    alert('로그인이 필요합니다.')
+                    location.href = '/login'
+                }
             }
         })
     }
 
-    function addReplyHtml(e){
+    function addReplyHtml(e){ //답글 폼 추가
         removeHtml()
         const html = ''
             +'<textarea class="comment_content" name="content" placeholder="내용을 작성하세요" maxlength="500"></textarea>'
@@ -141,28 +178,40 @@
             $(e).parent().append(html);
     }
 
-    function addUpdateHtml(e,type){
+    function addUpdateHtml(e,type){ //답글 수정 폼 추가
         removeHtml()
-        const html = ''
-            +'<textarea class="comment_content" name="content" placeholder="내용을 작성하세요" maxlength="500"></textarea>'
-            +'<button type="button" class="addStyle" onclick="updateComment(this)">수정</button>';
+
+        let className
+        if(type=='origin'){
+            className = 'comment_content'
+        }else{
+            className = 'comment_content_reply'
+        }
+
+        const preCon = $(e).parent().parent().next().children().html()
+        const html = `
+            <textarea class="${className}" name="content" placeholder="내용을 작성하세요" maxlength="500"></textarea>
+            <button type="button" class="addStyle" onclick="updateComment(this)">수정</button>`
         if(type=='origin'){
             $(e).parent().parent().next().next().next().append(html); // 댓글 수정
+            $(e).parent().parent().next().next().next().children().eq(2).html(preCon)
         }else{
             $(e).parent().parent().next().next().append(html); // 답글 수정
+            $(e).parent().parent().next().next().children().eq(2).html(preCon)
         }
     }
 
-    function removeHtml(){
+    function removeHtml(){ //폼 추가시 다른 폼 삭제
         $('.comment_content').remove();
+        $('.comment_content_reply').remove();
         $('.addStyle').remove();
     }
 
-    $('.likeDiv').click(function(){
+    $('.likeDiv').click(function(){ //좋아요 버튼 클릭시 스타일적용
         $('.likeDiv').hide()
     })
 
-    function like(){
+    function like(){ //좋아요 버튼 적용
 
         $.ajax({
             url: "/like/post",
@@ -195,7 +244,7 @@
     let roomId
     let userName
 
-    function enter(){
+    function enter(){ //채팅 시작
         userName = loginChk()
         roomId = $('#roomId').val()
         let sockJs = new SockJS('/stomp/chat')
@@ -224,13 +273,13 @@
         })
     }
 
-    function leave(){
+    function leave(){ //채팅 종료
         stompClient.send('/pub/chat', {}, JSON.stringify({type: 'LEAVE', roomId: roomId, sender: userName}))
         stompClient.disconnect()
         $('#chatText').val('')
     }
 
-    function send(){
+    function send(){ //채팅 보내기
         if(window.event.keyCode == 13){
             if($("#enter").attr('disabled')=='disabled'){
                 if($('#chatText').val()==''){
@@ -247,7 +296,7 @@
         }
     }
 
-    function loginChk(){
+    function loginChk(){ //실시간 채팅시 로그인유무
         const user = $('#userName').val()
         if(user==undefined){
             alert('로그인이 필요합니다.')
@@ -259,13 +308,13 @@
 
     $(function(){
         window.addEventListener('beforeunload', function () { //현재 페이지를 떠나거나 브라우저를 종료하려 할 때
-            leave() //채팅 연결 종료
+            leave()
         })
 
         $('.chatOnOff').hide()
     })
 
-    function onOff() {
+    function onOff() { //채팅 폼 온오프
         if($('.chatOnOff').css('display')=='none'){
             $('.chatOnOff').show()
         }else{
@@ -291,9 +340,9 @@
     </div>
 
     <div class="detail_btn">
-        <button onclick="list()" type="button" class="">목록</button>
-        <button onclick="update()" type="button" class="" th:if="${session.USER != null && session.USER.id==post.member.id}">수정</button>
-        <button onclick="del()" type="button" class="" th:if="${session.USER != null && session.USER.id==post.member.id}">삭제</button>
+        <button class="listBtn" onclick="list()" type="button">목록</button>
+        <button class="modBtn" onclick="update()" type="button" th:if="${session.USER != null && session.USER.id==post.member.id}">수정</button>
+        <button class="delBtn" onclick="del()" type="button" th:if="${session.USER != null && session.USER.id==post.member.id}">삭제</button>
     </div>
 
     <div class="likeWrap">
@@ -377,7 +426,9 @@
                         </form>
                     </div>
                 </div>
-                <div class="r_con" th:classappend="${reply.memberName == reply.postMemberName} ? 'writer' : ''" th:text="${reply.content}"></div>
+                <div class="r_con" th:classappend="${reply.memberName == reply.postMemberName} ? 'writer' : ''">
+                    <p th:text="${reply.content}"></p>
+                </div>
                 <form id="updateReply">
                     <input type="hidden" name="postId" th:value="${reply.postId}">
                     <input type="hidden" name="id" th:value="${reply.id}">

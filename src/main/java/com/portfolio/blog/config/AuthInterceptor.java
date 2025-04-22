@@ -23,7 +23,14 @@ public class AuthInterceptor implements HandlerInterceptor {
         Object user = session.getAttribute("USER");
 
         if(user==null){
-            response.sendRedirect("/login");
+            String requestedWith = request.getHeader("X-Requested-With");
+            if ("XMLHttpRequest".equals(requestedWith)) {// ajax 요청인지 아닌지를 구분하는 조건
+                response.setContentType("application/json");         // 응답 타입 JSON으로 지정
+                response.setCharacterEncoding("UTF-8");              // 한글 깨짐 방지
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // 401 응답 설정
+            }else{
+                response.sendRedirect("/login");
+            }
             return false;
         }
         if(url.contains("/null")){

@@ -1,4 +1,4 @@
-package com.portfolio.blog.repository;
+package com.portfolio.blog.repository.file;
 
 import com.portfolio.blog.entity.File;
 import org.springframework.data.jpa.repository.JpaRepository;

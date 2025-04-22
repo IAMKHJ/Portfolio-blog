@@ -30,8 +30,11 @@ public class PostController {
 
     //글 쓰기 화면
     @GetMapping("/post/write")
-    public String write(Model model){
+    public String write(Model model, @RequestParam(name = "category", defaultValue = "") String category, @RequestParam(name = "keyword", defaultValue = "") String keyword, @PageableDefault(page = 1) Pageable pageable){
         model.addAttribute("categoryList", categoryService.findAll());
+        model.addAttribute("categoryKeyword", category);
+        model.addAttribute("page", pageable.getPageNumber());
+        model.addAttribute("keyword", keyword);
         return "post/write";
     }
 
