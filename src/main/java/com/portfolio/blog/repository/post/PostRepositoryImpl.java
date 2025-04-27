@@ -1,6 +1,8 @@
 package com.portfolio.blog.repository.post;
 
 import com.portfolio.blog.entity.Post;
+import com.portfolio.blog.entity.common.Status;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -32,6 +34,7 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                 .where(
                         (post.category.eq(category).and(post.title.contains(keyword)))
                                 .or(post.category.eq(category).and(post.convertContent.contains(keyword)))
+                                .and(post.status.eq(Status.TRUE))
                 )
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
@@ -44,9 +47,52 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                 .where(
                         (post.category.eq(category).and(post.title.contains(keyword)))
                                 .or(post.category.eq(category).and(post.convertContent.contains(keyword)))
+                                .and(post.status.eq(Status.TRUE))
                 )
                 .fetchOne();
 
         return new PageImpl<>(posts, pageable, count);
     }
+
+    @Override
+    public Page<Post> adminPostListSearch(String searchCnd, String keyword, Pageable pageable) {
+        List<Post> posts = jpaQueryFactory
+                .selectFrom(post)
+                .where(
+                        searchCndCondtion(searchCnd, keyword) // 전체, 제목, 내용
+                )
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .orderBy(post.createdDate.desc())
+                .fetch();
+
+        Long count = jpaQueryFactory
+                .select(post.count())
+                .from(post)
+                .where(
+                        searchCndCondtion(searchCnd, keyword) // 전체, 제목, 내용
+                )
+                .fetchOne();
+
+        return new PageImpl<>(posts, pageable, count);
+    }
+
+    private BooleanExpression searchCndCondtion(String searchCnd, String keyword){
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return null; //검색어 없으면 조건 없음
+        }
+
+        String searchKeyword = "%" + keyword + "%";
+
+        if("title".equals(searchCnd)){
+            return post.title.like(searchKeyword);
+        }else if("content".equals(searchCnd)){
+            return post.convertContent.like(searchKeyword);
+        }else if("all".equals(searchCnd)){
+            return post.title.like(searchKeyword).or(post.convertContent.like(searchKeyword));
+        }else {
+            return null;
+        }
+    }
+
 }

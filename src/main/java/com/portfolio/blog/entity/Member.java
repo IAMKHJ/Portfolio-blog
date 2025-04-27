@@ -3,6 +3,7 @@ package com.portfolio.blog.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.portfolio.blog.entity.common.BaseEntity;
 import com.portfolio.blog.entity.common.RoleType;
+import com.portfolio.blog.entity.common.Status;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.DynamicUpdate;
@@ -39,6 +40,10 @@ public class Member extends BaseEntity {
     @Column(name = "member_role", nullable = false)
     private RoleType roleType;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "member_status", nullable = false)
+    private Status status;
+
     @JsonIgnore
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
     private List<Post> posts = new ArrayList<>();
@@ -49,6 +54,10 @@ public class Member extends BaseEntity {
 
     public void changePassword(String password) {
         this.password = password;
+    }
+
+    public void memberStatusUpdate(Status status) {
+        this.status = status;
     }
 
 }

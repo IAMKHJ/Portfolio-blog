@@ -25,7 +25,7 @@ public class UserController {
     private final CategoryService categoryService;
 
     @GetMapping("/login")
-    public String login(Model model, HttpServletRequest request){
+    public String login(HttpServletRequest request){
 
         if(request.getSession().getAttribute("USER")!=null){
             return "redirect:/";
@@ -82,13 +82,6 @@ public class UserController {
     public String profile(ChangeProfileDto dto) throws IOException {
         userService.changeProfile(dto);
         return "redirect:/myPage/profile/"+dto.getMemberUid();
-    }
-
-    @GetMapping("/myPage/category/{uid}")
-    public String category(@PathVariable(name = "uid") String uid, Model model){
-        model.addAttribute("member", memberService.findByUid(uid));
-        model.addAttribute("categoryList", categoryService.findAll());
-        return "user/category";
     }
 
 }

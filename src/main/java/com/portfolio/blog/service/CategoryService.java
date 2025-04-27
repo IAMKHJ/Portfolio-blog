@@ -54,7 +54,6 @@ public class CategoryService {
         }
 
         return list;
-
     }
 
     @Transactional

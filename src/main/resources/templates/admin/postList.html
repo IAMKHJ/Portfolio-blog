@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{common/header::header}"></head>
+<style>
+    .a{width:800px;margin:180px auto 0;}
+    .c{width:1300px;margin:50px auto 0;}
+    .pageWrap{display: flex;justify-content: center;}
+    .pageWrap>a{border: 1px solid #0a0a0a;color:#0a0a0a;padding: 7px 10px;border-radius: 5px;text-decoration: none;font-weight: bold;}
+    .pageWrap>span{border: 1px solid #0a0a0a;color:#0a0a0a;padding: 7px 10px;border-radius: 5px;text-decoration: none;font-weight: bold;}
+    .pageWrap>span>a{text-decoration: none;color:#0a0a0a;}
+    .ho:hover{text-decoration: underline;}
+</style>
+<script th:inline="javascript">
+    $(document).ready(function() {
+        $('.bar').find('a[href="' + document.location.pathname + '"]').addClass('active')
+    })
+
+    function postStatusUpdate(id, status){
+
+        $('#id').val(id)
+        $('#status').val('TRUE')
+
+        if(status=='TRUE'){
+            $('#status').val('FALSE')
+        }
+
+        $.ajax({
+            url: "/postStatusUpdate",
+            data: $("#postStatusForm").serialize(),
+            type: 'POST',
+            success: function(res){
+
+            }
+        })
+    }
+
+    function del(id){ //글 삭제
+        $.ajax({
+            url: "/post/delete/"+id,
+            type: 'DELETE',
+            success: function(res){
+                if(res.key=='ok'){
+                    alert('글이 삭제되었습니다.')
+                    location.href = '/myPage/post'
+                }
+            },
+            error: function(xhr) {
+                if (xhr.status === 401) {
+                    alert('로그인이 필요합니다.')
+                    location.href = '/login'
+                }
+            }
+        })
+    }
+</script>
+<body>
+<div th:replace="~{common/bodyUtil::bodyUtil}"></div>
+<div th:replace="~{common/bodyHeader::bodyHeader}"></div>
+<div class="a">
+    <ul class="nav nav-tabs bar">
+        <li class="nav-item">
+            <a class="nav-link" th:href="@{/myPage/info/{uid}(uid = ${session.USER.uid})}">기본 정보</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" th:href="@{/myPage/profile/{uid}(uid = ${session.USER.uid})}">프로필 이미지</a>
+        </li>
+        <li class="nav-item" th:if="${#strings.equals(session.USER.roleType, 'ADMIN')}">
+            <a class="nav-link" th:href="@{/myPage/category}">카테고리 설정</a>
+        </li>
+        <li class="nav-item" th:if="${#strings.equals(session.USER.roleType, 'ADMIN')}">
+            <a class="nav-link" th:href="@{/myPage/member}">멤버 관리</a>
+        </li>
+        <li class="nav-item" th:if="${#strings.equals(session.USER.roleType, 'ADMIN')}">
+            <a class="nav-link" th:href="@{/myPage/post}">게시물 관리</a>
+        </li>
+    </ul>
+</div>
+<!--start-->
+<div class="c">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-xl-12">
+                <div class="card">
+                    <div class="card-body">
+                        <!--상태 변경 폼-->
+                        <form id="postStatusForm">
+                            <input type="hidden" id="id" name="id" value="">
+                            <input type="hidden" id="status" name="status" value="">
+                        </form>
+
+                        <!--검색 폼 시작-->
+                        <form action="/myPage/post" method="get">
+                            <div class="alert alert-light bg-light text-dark sch_wrap">
+                                <div class="input-group col-sm-12">
+                                    <div class="input-group col-sm">
+                                        <select class="custom-select col-6" name="searchCnd">
+                                            <option value="all" th:selected="${searchCnd == 'all' or searchCnd == null}">전체</option>
+                                            <option value="title" th:selected="${searchCnd == 'title'}">제목</option>
+                                            <option value="content" th:selected="${searchCnd == 'content'}">내용</option>
+                                        </select>
+                                    </div>
+                                    <div class="input-group col-sm app-search">
+                                        <input type="text" class="form-control" placeholder="검색어 입력" name="keyword" th:value="${keyword}">
+                                        <span class="search-icon"></span>
+                                        <div class="input-group-append">
+                                            <button class="btn btn-primary" type="submit">검색</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                        <!--검색 폼 끝-->
+                        <!--테이블 시작-->
+                        <div data-simplebar class="table-responsive">
+                            <table class="table table-striped table-hover text-center">
+                                <thead>
+                                <tr>
+                                    <th scope="col">번호</th>
+                                    <th scope="col">글쓴이</th>
+                                    <th scope="col">제목</th>
+                                    <th scope="col">내용</th>
+                                    <th scope="col">작성일</th>
+                                    <th scope="col">조회수</th>
+                                    <th scope="col">상태</th>
+                                    <th scope="col"></th>
+                                </tr>
+                                </thead>
+                                <tbody class="align-middle">
+                                <tr th:each="post, status : ${list}">
+                                    <th th:text="${list.totalElements - ((list.number) * list.size + status.index)}"></th>
+                                    <td th:text="${post.memberName}"></td>
+                                    <td th:text="${#strings.abbreviate(post.title, 20)}"></td>
+                                    <td th:text="${#strings.abbreviate(post.content, 30)}"></td>
+                                    <td th:text="*{#temporals.format(post.createdDate, 'yy-MM-dd HH:mm')}"></td>
+                                    <td th:text="${post.hit}"></td>
+                                    <td>
+                                        <select class="custom-select text-center" name="status" th:onchange="postStatusUpdate([[${post.id}]],[[${post.status}]])">
+                                            <option value="TRUE" th:selected="${post.status.name() == 'TRUE'}">사용</option>
+                                            <option value="FALSE" th:selected="${post.status.name() == 'FALSE'}">미사용</option>
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <button type="button" class="btn btn-danger" th:onclick="del([[${post.id}]])">삭제</button>
+                                    </td>
+                                </tr>
+                                <tr th:if="${list.totalElements<=0}">
+                                    <td colspan="12">등록된 데이터가 없습니다.</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <!--테이블 끝-->
+                        <!-- 페이징 시작 -->
+                        <div class="pageWrap" th:if="${list.totalElements>0}">
+                            <!-- 첫번째 페이지로 이동 -->
+                            <a class="me-1 ho" th:href="@{/myPage/post(page=1,searchCnd=${searchCnd},keyword=${keyword})}">처음</a>
+                            <!-- 이전 링크 활성화 비활성화 -->
+                            <a class="me-3 ho" th:href="${list.first} ? '#' : @{/myPage/post(page=${list.number},searchCnd=${searchCnd},keyword=${keyword})}">이전</a>
+                            <!-- 페이지 번호 링크(현재 페이지는 숫자만) -->
+                            <span th:style="${page == list.number + 1?'background-color:#0a0a0a;color: #fff;':''}" class="ms-1 me-1" th:each="page : ${#numbers.sequence(startPage, endPage)}">
+                                <span th:if="${page == list.number + 1}" th:text="${page}"></span>
+                                <a class="ho" th:unless="${page == list.number + 1}" th:href="@{/myPage/post(page=${page},searchCnd=${searchCnd},keyword=${keyword})}" th:text="${page}"></a>
+                            </span>
+                            <!-- 다음 링크 활성화 비활성화 -->
+                            <a class="ms-3 ho" th:href="${list.last} ? '#' : @{/myPage/post(page=${list.number + 2},searchCnd=${searchCnd},keyword=${keyword})}">다음</a>
+                            <!-- 마지막 페이지로 이동 -->
+                            <a class="ms-1 ho" th:href="@{/myPage/post(page=${list.totalPages},searchCnd=${searchCnd},keyword=${keyword})}">마지막</a>
+                        </div>
+                        <!--페이징 끝-->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--end-->
+</body>
+</html>

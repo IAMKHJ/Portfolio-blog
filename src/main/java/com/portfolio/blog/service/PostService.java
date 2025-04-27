@@ -1,25 +1,21 @@
 package com.portfolio.blog.service;
 
 import com.portfolio.blog.dto.MessageDto;
-import com.portfolio.blog.dto.post.PostDetailDto;
-import com.portfolio.blog.dto.post.PostListDto;
-import com.portfolio.blog.dto.post.PostSaveDto;
-import com.portfolio.blog.dto.post.PostUpdateDto;
+import com.portfolio.blog.dto.post.*;
 import com.portfolio.blog.entity.Member;
 import com.portfolio.blog.entity.Post;
+import com.portfolio.blog.entity.common.Status;
 import com.portfolio.blog.repository.member.MemberRepository;
 import com.portfolio.blog.repository.post.PostRepository;
 import lombok.RequiredArgsConstructor;
 import org.jsoup.Jsoup;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -44,6 +40,7 @@ public class PostService {
                     .member(memberEntity)
                     .category(dto.getCategory())
                     .convertContent(Jsoup.parse(dto.getContent()).text())
+                    .status(Status.TRUE)
                     .build();
 
             Post post = postRepository.save(newPost);
@@ -84,8 +81,13 @@ public class PostService {
     @Transactional(readOnly = true)
     public Slice<PostListDto> findAllSlice(Pageable pageable) {
         Slice<Post> posts = postRepository.findAll(pageable);
-        return posts
-                .map(PostListDto::new);
+
+        //status가 TRUE인 것만 PostListDto로 변환
+        return posts.stream()
+                .filter(post -> post.getStatus() == Status.TRUE) // status가 TRUE인 것만
+                .map(PostListDto::new) // PostListDto로 변환
+                .collect(Collectors.collectingAndThen(Collectors.toList(),
+                        list -> new SliceImpl<>(list, pageable, posts.hasNext())));
     }
 
     @Transactional(readOnly = true)
@@ -131,6 +133,24 @@ public class PostService {
     @Transactional
     public void updateHits(Long id){
         postRepository.updateHits(id);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<AdminPostListDto> adminPostListSearch(String searchCnd, String keyword, Pageable pageable) {
+        int page = pageable.getPageNumber() - 1; // page 위치에 있는 값은 0부터 시작
+        int pageLimit = pageable.getPageSize(); // 한페이지에 보여줄 글 개수
+
+        Page<Post> posts = postRepository.adminPostListSearch(searchCnd, keyword, PageRequest.of(page, pageLimit));
+        return posts
+                .map(AdminPostListDto::new);
+    }
+
+    @Transactional
+    public void postStatusUpdate(PostStatusUpdateDto dto){
+        Post post = postRepository.findById(dto.getId())
+                .orElseThrow(()-> new IllegalArgumentException("해당 글을 찾을 수 없습니다."));
+
+        post.postStatusUpdate(dto.getStatus());
     }
 
 }

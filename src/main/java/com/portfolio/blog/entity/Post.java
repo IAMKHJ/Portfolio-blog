@@ -3,12 +3,12 @@ package com.portfolio.blog.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.portfolio.blog.dto.post.PostUpdateDto;
 import com.portfolio.blog.entity.common.BaseEntity;
+import com.portfolio.blog.entity.common.Status;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.DynamicUpdate;
 import org.jsoup.Jsoup;
-
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,6 +45,10 @@ public class Post extends BaseEntity {
     @JoinColumn(name = "member_id")
     private Member member;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "post_status", nullable = false)
+    private Status status;
+
     @JsonIgnore
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
     private List<Comment> comments = new ArrayList<>();
@@ -64,6 +68,10 @@ public class Post extends BaseEntity {
         this.content = dto.getContent();
         this.category = dto.getCategory();
         this.convertContent = Jsoup.parse(dto.getContent()).text();
+    }
+
+    public void postStatusUpdate(Status status) {
+        this.status = status;
     }
 
 }

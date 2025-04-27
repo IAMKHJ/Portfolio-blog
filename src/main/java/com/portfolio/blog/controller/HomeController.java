@@ -25,7 +25,6 @@ public class HomeController {
 
     @GetMapping("/")
     public String home(Model model){
-
         List<CategoryListDto> result = categoryService.findAll();
 
         if(!result.isEmpty()){
