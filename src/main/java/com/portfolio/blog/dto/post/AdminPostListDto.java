@@ -21,6 +21,7 @@ public class AdminPostListDto {
     private File file;
     private LocalDateTime createdDate;
     private Status status;
+    private String category;
 
     public AdminPostListDto(Post entity) {
         this.id = entity.getId();
@@ -31,6 +32,7 @@ public class AdminPostListDto {
         this.file = entity.getFiles().isEmpty() ? null : entity.getFiles().get(0);
         this.createdDate = entity.getCreatedDate();
         this.status = entity.getStatus();
+        this.category = entity.getCategory();
     }
 
 }

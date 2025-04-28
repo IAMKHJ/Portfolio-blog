@@ -136,11 +136,11 @@ public class PostService {
     }
 
     @Transactional(readOnly = true)
-    public Page<AdminPostListDto> adminPostListSearch(String searchCnd, String keyword, Pageable pageable) {
+    public Page<AdminPostListDto> adminPostListSearch(String category, String searchCnd, String keyword, Pageable pageable) {
         int page = pageable.getPageNumber() - 1; // page 위치에 있는 값은 0부터 시작
         int pageLimit = pageable.getPageSize(); // 한페이지에 보여줄 글 개수
 
-        Page<Post> posts = postRepository.adminPostListSearch(searchCnd, keyword, PageRequest.of(page, pageLimit));
+        Page<Post> posts = postRepository.adminPostListSearch(category, searchCnd, keyword, PageRequest.of(page, pageLimit));
         return posts
                 .map(AdminPostListDto::new);
     }

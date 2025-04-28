@@ -55,11 +55,12 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
     }
 
     @Override
-    public Page<Post> adminPostListSearch(String searchCnd, String keyword, Pageable pageable) {
+    public Page<Post> adminPostListSearch(String category, String searchCnd, String keyword, Pageable pageable) {
         List<Post> posts = jpaQueryFactory
                 .selectFrom(post)
                 .where(
-                        searchCndCondtion(searchCnd, keyword) // 전체, 제목, 내용
+                        categoryCondition(category), //카테고리
+                        searchCndCondition(searchCnd, keyword) // 전체, 제목, 내용
                 )
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
@@ -70,14 +71,23 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                 .select(post.count())
                 .from(post)
                 .where(
-                        searchCndCondtion(searchCnd, keyword) // 전체, 제목, 내용
+                        categoryCondition(category), //카테고리
+                        searchCndCondition(searchCnd, keyword) // 전체, 제목, 내용
                 )
                 .fetchOne();
 
         return new PageImpl<>(posts, pageable, count);
     }
 
-    private BooleanExpression searchCndCondtion(String searchCnd, String keyword){
+    private BooleanExpression categoryCondition(String category) {
+        if (category == null || category.equals("all") || category.trim().isEmpty()) {
+            return null; // 전체 선택 시 조건 없이
+        }
+
+        return post.category.eq(category);
+    }
+
+    private BooleanExpression searchCndCondition(String searchCnd, String keyword){
         if (keyword == null || keyword.trim().isEmpty()) {
             return null; //검색어 없으면 조건 없음
         }

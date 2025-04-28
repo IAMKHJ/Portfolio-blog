@@ -24,7 +24,7 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
                 .selectFrom(member)
                 .where(
                         roleTypeCondition(roleType), //전체, 관리자, 일반회원
-                        searchCndCondtion(searchCnd, keyword) // 전체, 아이디, 이름
+                        searchCndCondition(searchCnd, keyword) // 전체, 아이디, 이름
                 )
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
@@ -36,7 +36,7 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
                 .from(member)
                 .where(
                         roleTypeCondition(roleType), //전체, 관리자, 일반회원
-                        searchCndCondtion(searchCnd, keyword) //전체, 아이디, 이름
+                        searchCndCondition(searchCnd, keyword) //전체, 아이디, 이름
                 )
                 .fetchOne();
 
@@ -53,7 +53,7 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
         }
     }
 
-    private BooleanExpression searchCndCondtion(String searchCnd, String keyword){
+    private BooleanExpression searchCndCondition(String searchCnd, String keyword){
         if (keyword == null || keyword.trim().isEmpty()) {
             return null; //검색어 없으면 조건 없음
         }

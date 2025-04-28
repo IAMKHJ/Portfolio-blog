@@ -7,5 +7,5 @@ import org.springframework.data.domain.Pageable;
 public interface PostRepositoryCustom {
     void updateHits(Long id);
     Page<Post> postListSearch(String category, String keyword, Pageable pageable);
-    Page<Post> adminPostListSearch(String searchCnd, String keyword, Pageable pageable);
+    Page<Post> adminPostListSearch(String category, String searchCnd, String keyword, Pageable pageable);
 }

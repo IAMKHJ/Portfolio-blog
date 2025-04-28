@@ -81,7 +81,7 @@ public class AdminController {
     }
 
     @GetMapping("/myPage/post")
-    public String adminPostList(HttpSession session, Model model, @RequestParam(name = "searchCnd", defaultValue = "") String searchCnd, @RequestParam(name = "keyword", defaultValue = "") String keyword, @PageableDefault(page = 1, size = 10, direction = Sort.Direction.DESC) Pageable pageable){
+    public String adminPostList(HttpSession session, Model model, @RequestParam(name = "category", defaultValue = "") String category, @RequestParam(name = "searchCnd", defaultValue = "") String searchCnd, @RequestParam(name = "keyword", defaultValue = "") String keyword, @PageableDefault(page = 1, size = 10, direction = Sort.Direction.DESC) Pageable pageable){
 
         LoginSessionDto loginSessionDto = (LoginSessionDto) session.getAttribute("USER");
 
@@ -89,7 +89,7 @@ public class AdminController {
             return "redirect:/";
         }
 
-        Page<AdminPostListDto> list = postService.adminPostListSearch(searchCnd, keyword, pageable);
+        Page<AdminPostListDto> list = postService.adminPostListSearch(category, searchCnd, keyword, pageable);
 
         /*
          * blockLimit : page 개수 설정
@@ -105,6 +105,8 @@ public class AdminController {
         model.addAttribute("endPage", endPage);
         model.addAttribute("searchCnd", searchCnd);
         model.addAttribute("keyword", keyword);
+        model.addAttribute("categoryKeyword", category);
+        model.addAttribute("categoryList", categoryService.findAll());
 
         return "admin/postList";
     }
