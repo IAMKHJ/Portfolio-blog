@@ -120,7 +120,7 @@
                                         <td th:text="${member.roleType.name() == 'ADMIN' ? '관리자' : '일반 사용자'}"></td>
                                         <td th:text="*{#temporals.format(member.createdDate, 'yyyy.MM.dd')}"></td>
                                         <td>
-                                            <select class="custom-select text-center" name="status" th:onchange="memberStatusUpdate([[${member.id}]],[[${member.status}]])">
+                                            <select th:if="${member.roleType.name() == 'USER'}" class="custom-select text-center" name="status" th:onchange="memberStatusUpdate([[${member.id}]],[[${member.status}]])">
                                                 <option value="TRUE" th:selected="${member.status.name() == 'TRUE'}">사용</option>
                                                 <option value="FALSE" th:selected="${member.status.name() == 'FALSE'}">미사용</option>
                                             </select>

@@ -6,6 +6,7 @@ import com.portfolio.blog.dto.user.ChangeProfileDto;
 import com.portfolio.blog.dto.user.LoginDto;
 import com.portfolio.blog.dto.user.LoginSessionDto;
 import com.portfolio.blog.entity.Member;
+import com.portfolio.blog.entity.common.Status;
 import com.portfolio.blog.repository.member.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -29,11 +30,15 @@ public class UserService {
 
         Optional<Member> member = memberRepository.findByUid(dto.getUid());
 
-        if(member.isEmpty()){ // 회원 없으면
+        if(member.isEmpty()){ //회원 없으면
             return new MessageDto<>("noMember");
         }
+        
+        if(member.get().getStatus() == Status.FALSE){ //멤버관리 상태 : 미사용시 로그인 제한
+            return new MessageDto<>("statusFalse");
+        }
 
-        if(passwordEncoder.matches(dto.getPassword(), member.get().getPassword())){ // 비밀번호 맞으면
+        if(passwordEncoder.matches(dto.getPassword(), member.get().getPassword())){ //비밀번호 맞으면
             LoginSessionDto loginMember = LoginSessionDto.builder()
                     .id(member.get().getId())
                     .uid(member.get().getUid())
