@@ -160,18 +160,18 @@
                         <!-- 페이징 시작 -->
                         <div class="pageWrap" th:if="${list.totalElements>0}">
                             <!-- 첫번째 페이지로 이동 -->
-                            <a class="me-1 ho" th:href="@{/myPage/post(page=1,category=${category},searchCnd=${searchCnd},keyword=${keyword})}">처음</a>
+                            <a class="me-1 ho" th:href="@{/myPage/post(page=1,category=${categoryKeyword},searchCnd=${searchCnd},keyword=${keyword})}">처음</a>
                             <!-- 이전 링크 활성화 비활성화 -->
-                            <a class="me-3 ho" th:href="${list.first} ? '#' : @{/myPage/post(page=${list.number},category=${category},searchCnd=${searchCnd},keyword=${keyword})}">이전</a>
+                            <a class="me-3 ho" th:href="${list.first} ? '#' : @{/myPage/post(page=${list.number},category=${categoryKeyword},searchCnd=${searchCnd},keyword=${keyword})}">이전</a>
                             <!-- 페이지 번호 링크(현재 페이지는 숫자만) -->
                             <span th:style="${page == list.number + 1?'background-color:#0a0a0a;color: #fff;':''}" class="ms-1 me-1" th:each="page : ${#numbers.sequence(startPage, endPage)}">
                                 <span th:if="${page == list.number + 1}" th:text="${page}"></span>
-                                <a class="ho" th:unless="${page == list.number + 1}" th:href="@{/myPage/post(page=${page},category=${category},searchCnd=${searchCnd},keyword=${keyword})}" th:text="${page}"></a>
+                                <a class="ho" th:unless="${page == list.number + 1}" th:href="@{/myPage/post(page=${page},category=${categoryKeyword},searchCnd=${searchCnd},keyword=${keyword})}" th:text="${page}"></a>
                             </span>
                             <!-- 다음 링크 활성화 비활성화 -->
-                            <a class="ms-3 ho" th:href="${list.last} ? '#' : @{/myPage/post(page=${list.number + 2},category=${category},searchCnd=${searchCnd},keyword=${keyword})}">다음</a>
+                            <a class="ms-3 ho" th:href="${list.last} ? '#' : @{/myPage/post(page=${list.number + 2},category=${categoryKeyword},searchCnd=${searchCnd},keyword=${keyword})}">다음</a>
                             <!-- 마지막 페이지로 이동 -->
-                            <a class="ms-1 ho" th:href="@{/myPage/post(page=${list.totalPages},category=${category},searchCnd=${searchCnd},keyword=${keyword})}">마지막</a>
+                            <a class="ms-1 ho" th:href="@{/myPage/post(page=${list.totalPages},category=${categoryKeyword},searchCnd=${searchCnd},keyword=${keyword})}">마지막</a>
                         </div>
                         <!--페이징 끝-->
                     </div>
