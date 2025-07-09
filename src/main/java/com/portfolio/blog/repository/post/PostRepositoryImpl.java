@@ -19,10 +19,10 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
     private final JPAQueryFactory jpaQueryFactory;
 
     @Override
-    public void updateHits(Long id) {
+    public void updateHits(Long id, int amount) {
         jpaQueryFactory
                 .update(post)
-                .set(post.hit, post.hit.add(1))
+                .set(post.hit, post.hit.add(amount))
                 .where(post.id.eq(id))
                 .execute();
     }
