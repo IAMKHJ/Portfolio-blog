@@ -59,7 +59,7 @@
             }
             const html = ''
                 +`<li>`
-                    +`<a href="/post/detail/${con.id}?category=${con.file.post.category}">`
+                    +`<a href="/post/detail/${con.id}?category=${con.category}">`
                         +`<div><img src="${filePath}"></div>`
                         +`<div class="post_title">${con.title}</div>`
                         +`<div class="post_desc">${con.content}</div>`
@@ -74,11 +74,14 @@
     let page = 1
     let last = false
     let end = false
+    let loading = false
 
     $(window).scroll(function() {
        if($(window).scrollTop() + $(window).height() == $(document).height()) {
 
-            if(last==false){
+            if(last==false && loading==false){
+                loading = true
+
                 $.ajax({
                     url: '/post/scroll?page='+page+'&size='+limit+'&sort=createdDate,desc',
                     type: 'GET',
@@ -89,12 +92,13 @@
                         if(res.last==true){
                             last = true
                         }
+                    },
+                    complete: function() {
+                        loading = false
                     }
                 })
-            }else{
-                if(end==false){
-                    $('.conLast').html('더 이상 추가될 글이 없습니다.')
-                }
+            } else if(last==true && end==false){
+                $('.conLast').html('더 이상 추가될 글이 없습니다.')
                 end = true
             }
 

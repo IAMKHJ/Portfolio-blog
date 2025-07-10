@@ -19,6 +19,7 @@ public class PostListDto {
     private String memberName;
     private File file;
     private LocalDateTime createdDate;
+    private String category;
 
     public PostListDto(Post entity) {
         this.id = entity.getId();
@@ -28,5 +29,6 @@ public class PostListDto {
         this.memberName = entity.getMember().getName();
         this.file = entity.getFiles().isEmpty() ? null : entity.getFiles().get(0);
         this.createdDate = entity.getCreatedDate();
+        this.category = entity.getCategory();
     }
 }

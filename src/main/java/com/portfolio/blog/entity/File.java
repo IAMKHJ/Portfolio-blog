@@ -1,5 +1,6 @@
 package com.portfolio.blog.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.portfolio.blog.entity.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -36,10 +37,12 @@ public class File extends BaseEntity {
 
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "post_id")
+    @JsonIgnore
     private Post post;
 
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "member_id")
+    @JsonIgnore
     private Member member;
 
 }
