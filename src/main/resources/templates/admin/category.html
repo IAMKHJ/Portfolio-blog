@@ -12,7 +12,6 @@
 </style>
 <script th:inline="javascript">
 $(document).ready(function() {
-    $('.bar').find('a[href="' + document.location.pathname + '"]').addClass('active')
 
     let startIndex,endTr
     $(".con").sortable({
@@ -104,23 +103,7 @@ function delCate(id,name){
 <div th:replace="~{common/bodyUtil::bodyUtil}"></div>
 <div th:replace="~{common/bodyHeader::bodyHeader}"></div>
 <div class="a">
-    <ul class="nav nav-tabs bar">
-        <li class="nav-item">
-            <a class="nav-link" th:href="@{/myPage/info/{uid}(uid = ${session.USER.uid})}">기본 정보</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" th:href="@{/myPage/profile/{uid}(uid = ${session.USER.uid})}">프로필 이미지</a>
-        </li>
-        <li class="nav-item" th:if="${#strings.equals(session.USER.roleType, 'ADMIN')}">
-            <a class="nav-link" th:href="@{/myPage/category}">카테고리 설정</a>
-        </li>
-        <li class="nav-item" th:if="${#strings.equals(session.USER.roleType, 'ADMIN')}">
-            <a class="nav-link" th:href="@{/myPage/member}">멤버 관리</a>
-        </li>
-        <li class="nav-item" th:if="${#strings.equals(session.USER.roleType, 'ADMIN')}">
-            <a class="nav-link" th:href="@{/myPage/post}">게시물 관리</a>
-        </li>
-    </ul>
+    <div th:replace="~{common/infoNav::infoNav}"></div>
     <form id="cateForm">
         <input type="hidden" id="categoryName" name="name">
     </form>

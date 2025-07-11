@@ -29,7 +29,6 @@ public class AdminController {
     private final MemberService memberService;
     private final PostService postService;
 
-
     @GetMapping("/myPage/category")
     public String category(Model model, HttpSession session){
 

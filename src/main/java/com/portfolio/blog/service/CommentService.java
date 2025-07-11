@@ -11,6 +11,9 @@ import com.portfolio.blog.repository.comment.CommentRepository;
 import com.portfolio.blog.repository.member.MemberRepository;
 import com.portfolio.blog.repository.post.PostRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -95,12 +98,22 @@ public class CommentService {
         return list;
     }
 
+    @Transactional(readOnly = true)
+    public Page<Comment> myCommentList(String uid, Pageable pageable) {
+        Member member = memberRepository.findByUid(uid)
+                .orElseThrow(() -> new IllegalArgumentException("댓글 작성자를 찾을 수 없습니다."));
+
+        int page = pageable.getPageNumber() - 1; // page 위치에 있는 값은 0부터 시작
+        int pageLimit = pageable.getPageSize(); // 한페이지에 보여줄 글 개수
+
+        return commentRepository.findByMemberId(member.getId(), PageRequest.of(page, pageLimit));
+    }
+
     @Transactional
     public void delete(CommentDeleteDto dto) {
-
         Comment comment = commentRepository.findById(dto.getId())
                 .orElseThrow(() -> new IllegalArgumentException("댓글을 찾을 수 없습니다."));
-
         commentRepository.delete(comment);
     }
+
 }
