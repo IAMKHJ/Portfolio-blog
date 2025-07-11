@@ -32,7 +32,7 @@ public class CommentController {
         return "post/detail :: #comment_info_wrap";
     }
 
-    // 댓글 수정
+    // 댓글 삭제
     @PostMapping("/comment/delete")
     public String delete(@ModelAttribute CommentDeleteDto dto, Model model){
         commentService.delete(dto);

@@ -1,5 +1,6 @@
 package com.portfolio.blog.service;
 
+import com.portfolio.blog.dto.MessageDto;
 import com.portfolio.blog.dto.comment.CommentDeleteDto;
 import com.portfolio.blog.dto.comment.CommentListDto;
 import com.portfolio.blog.dto.comment.CommentSaveDto;
@@ -14,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -99,14 +101,14 @@ public class CommentService {
     }
 
     @Transactional(readOnly = true)
-    public Page<Comment> myCommentList(String uid, Pageable pageable) {
-        Member member = memberRepository.findByUid(uid)
+    public Page<Comment> myCommentList(Long id, Pageable pageable) {
+        Member member = memberRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("댓글 작성자를 찾을 수 없습니다."));
 
         int page = pageable.getPageNumber() - 1; // page 위치에 있는 값은 0부터 시작
         int pageLimit = pageable.getPageSize(); // 한페이지에 보여줄 글 개수
 
-        return commentRepository.findByMemberId(member.getId(), PageRequest.of(page, pageLimit));
+        return commentRepository.findByMemberId(member.getId(), PageRequest.of(page, pageLimit, Sort.Direction.DESC, "createdDate"));
     }
 
     @Transactional
@@ -114,6 +116,14 @@ public class CommentService {
         Comment comment = commentRepository.findById(dto.getId())
                 .orElseThrow(() -> new IllegalArgumentException("댓글을 찾을 수 없습니다."));
         commentRepository.delete(comment);
+    }
+
+    @Transactional
+    public MessageDto<?> myCommentDelete(Long id) {
+        Comment comment = commentRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("댓글을 찾을 수 없습니다."));
+        commentRepository.delete(comment);
+        return new MessageDto<>("ok");
     }
 
 }

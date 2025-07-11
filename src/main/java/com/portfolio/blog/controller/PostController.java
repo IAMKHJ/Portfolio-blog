@@ -91,7 +91,7 @@ public class PostController {
     //글 단건 조회
     @GetMapping("/post/detail/{id}")
     public String findById(@PathVariable(name = "id") Long id, Model model, @RequestParam(name = "category", defaultValue = "") String category, @RequestParam(name = "keyword", defaultValue = "") String keyword, @PageableDefault(page = 1) Pageable pageable, HttpServletRequest request){
-        /*postService.updateHits(id);*/
+        postService.updateHits(id);
         model.addAttribute("post", postService.findById(id));
         model.addAttribute("commentList", commentService.findAllByPost(id));
         model.addAttribute("page", pageable.getPageNumber());

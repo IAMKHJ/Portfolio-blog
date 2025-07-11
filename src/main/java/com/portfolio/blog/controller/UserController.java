@@ -91,8 +91,8 @@ public class UserController {
         return "redirect:/myPage/profile/"+dto.getMemberUid();
     }
 
-    @GetMapping("/myPage/myComment/{uid}")
-    public String myCommentList(HttpSession session, Model model, @PathVariable(name = "uid") String uid, @PageableDefault(page = 1, size = 10, direction = Sort.Direction.DESC) Pageable pageable){
+    @GetMapping("/myPage/myComment")
+    public String myCommentList(HttpSession session, Model model, @PageableDefault(page = 1, size = 10, direction = Sort.Direction.DESC) Pageable pageable){
 
         LoginSessionDto loginSessionDto = (LoginSessionDto) session.getAttribute("USER");
 
@@ -100,7 +100,7 @@ public class UserController {
             return "redirect:/";
         }
 
-        Page<Comment> list = commentService.myCommentList(uid, pageable);
+        Page<Comment> list = commentService.myCommentList(loginSessionDto.getId(), pageable);
 
         /*
          * blockLimit : page 개수 설정
@@ -116,6 +116,13 @@ public class UserController {
         model.addAttribute("endPage", endPage);
 
         return "user/myCommentList";
+    }
+
+    //myPage 내가 쓴 댓글 삭제
+    @ResponseBody
+    @DeleteMapping("/myComment/delete/{id}")
+    public MessageDto<?> myCommentDelete(@PathVariable(name = "id") Long id){
+        return commentService.myCommentDelete(id);
     }
 
 }
