@@ -51,6 +51,16 @@
             }
         })
     }
+
+    function autoLogin(role){
+        $('#password').val('123456789')
+        if(role=='admin'){
+            $('#uid').val('admin')
+        }else{
+            $('#uid').val('test')
+        }
+        login()
+    }
 </script>
 <body>
     <div th:replace="~{common/bodyHeader::bodyHeader}"></div>
@@ -60,10 +70,10 @@
                 <div class="l_title">BLOG</div>
                 <div class="login_box">
                     <div class="input_form">
-                        <input type="text" id="uid" name="uid" placeholder="ID" onkeydown="enter()" value="admin">
+                        <input type="text" id="uid" name="uid" placeholder="ID" onkeydown="enter()" value="">
                     </div>
                     <div class="input_form password">
-                        <input type="password" id="password" name="password" placeholder="Password" onkeydown="enter()" value="123456789">
+                        <input type="password" id="password" name="password" placeholder="Password" onkeydown="enter()" value="">
                     </div>
                 </div>
                 <button type="button" class="login_btn" onclick="login()">로그인</button>
@@ -71,6 +81,8 @@
         </form>
         <div class="join_form">
             <a href="/join">회원가입</a>
+            <a style="cursor:pointer;float:right;border: 1px solid black;border-radius: 15px;padding: 0 7px 0 7px;" onclick="autoLogin('admin')">관리자 로그인</a>
+            <a style="cursor:pointer;float:right;border: 1px solid black;border-radius: 15px;padding: 0 7px 0 7px;margin-right: 10px;" onclick="autoLogin('user')">일반 사용자 로그인</a>
         </div>
     </div>
 </body>
