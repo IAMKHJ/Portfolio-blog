@@ -251,6 +251,7 @@
     let userName
 
     function enter(){ //채팅 시작
+        $('#chatCnt').css('display', 'inline-block')
         userName = loginChk()
         roomId = $('#roomId').val()
         let sockJs = new SockJS('/stomp/chat')
@@ -272,6 +273,12 @@
                     $('.addChat').first().remove()
                 }
             })
+
+            // 참가자 수
+            stompClient.subscribe("/sub/chat/" + roomId + "/participants", function (chat) {
+                let cnt = chat.body
+                $('#chatCnt').text('채팅인원 : '+cnt)
+            });
 
             stompClient.send('/pub/chat', {}, JSON.stringify({type: 'ENTER', roomId: roomId, sender: userName}))
             $('#chatText').val('')
@@ -447,6 +454,7 @@
     <!-- 채팅 시작 -->
     <div class="chatFix">
         <button type="button" th:if="${chat!=null}" class="btn btn-outline-secondary" onclick="onOff()">실시간 채팅</button>
+        <div id="chatCnt" style="display:none;">채팅인원 : 0</div>
         <div class="chatOnOff" th:if="${chat!=null}">
             <input type="hidden" id="roomId" th:if="${chat!=null}" th:value="${chat.name}">
             <input type="hidden" id="userName" th:if="${session.USER!=null}" th:value="${session.USER.uid}">
