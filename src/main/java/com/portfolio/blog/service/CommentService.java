@@ -74,6 +74,21 @@ public class CommentService {
     }
 
     @Transactional(readOnly = true)
+    public Page<Comment> adminCommentListSearch(Pageable pageable){
+        int page = pageable.getPageNumber() - 1; // page 위치에 있는 값은 0부터 시작
+        int pageLimit = pageable.getPageSize(); // 한페이지에 보여줄 글 개수
+        return commentRepository.findAll(PageRequest.of(page, pageLimit, Sort.Direction.DESC, "createdDate"));
+    }
+
+    @Transactional(readOnly = true)
+    public Page<Comment> adminCommentListSearch(String searchCnd, String keyword, Pageable pageable) {
+        int page = pageable.getPageNumber() - 1; // page 위치에 있는 값은 0부터 시작
+        int pageLimit = pageable.getPageSize(); // 한페이지에 보여줄 글 개수
+
+        return commentRepository.adminCommentListSearch(searchCnd, keyword, PageRequest.of(page, pageLimit));
+    }
+
+    @Transactional(readOnly = true)
     public List<CommentListDto> findAllByPost(Long id) {
 
          List<Comment> comments = commentRepository.findAllByPost(id);

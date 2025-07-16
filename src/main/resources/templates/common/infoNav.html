@@ -23,4 +23,7 @@
     <li class="nav-item" th:if="${#strings.equals(session.USER.roleType, 'ADMIN')}">
         <a class="nav-link" th:href="@{/myPage/post}">게시물 관리</a>
     </li>
+    <li class="nav-item" th:if="${#strings.equals(session.USER.roleType, 'ADMIN')}">
+        <a class="nav-link" th:href="@{/myPage/comment}">댓글 관리</a>
+    </li>
 </ul>
