@@ -93,7 +93,7 @@
                                 </thead>
                                 <tbody class="align-middle">
                                     <tr th:each="member, status : ${list}">
-                                        <th th:text="${list.totalElements - ((list.number) * list.size + status.index)}"></th>
+                                        <td th:text="${list.totalElements - ((list.number) * list.size + status.index)}"></td>
                                         <td th:text="${member.uid}"></td>
                                         <td th:text="${member.name}"></td>
                                         <td th:text="${member.email}"></td>
